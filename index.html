@@ -4,7 +4,315 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Control de Laboratorio</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* -----------------------------------
+       VARIABLES & RESET
+    ----------------------------------- */
+    :root {
+      --bg:         #0b0f1a;
+      --surface:    #111827;
+      --surface-2:  #1a2235;
+      --border:     #1e2d45;
+      --accent:     #00e5ff;
+      --accent-dim: #00e5ff22;
+      --green:      #00e676;
+      --green-dim:  #00e67622;
+      --red:        #ff4c6a;
+      --red-dim:    #ff4c6a22;
+      --text:       #e8edf5;
+      --text-muted: #5a6a85;
+      --mono:       'Space Mono', monospace;
+      --body:       'DM Sans', sans-serif;
+      --radius:     12px;
+      --radius-sm:  8px;
+      --ease:       0.22s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--body);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 32px 16px 64px;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -10%, #00e5ff0d 0%, transparent 70%),
+        repeating-linear-gradient(0deg, transparent, transparent 39px, #ffffff04 39px, #ffffff04 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, #ffffff04 39px, #ffffff04 40px);
+    }
+
+    /* -----------------------------------
+       LAYOUT
+    ----------------------------------- */
+    .container {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* -----------------------------------
+       HEADER
+    ----------------------------------- */
+    .header {
+      text-align: center;
+      padding: 24px 0 8px;
+      animation: fadeDown 0.5s ease both;
+    }
+    .header .icon { font-size: 2.4rem; margin-bottom: 10px; display: block; }
+    .header h1 {
+      font-family: var(--mono);
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      text-shadow: 0 0 24px var(--accent);
+    }
+    .header p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+      text-transform: uppercase;
+    }
+
+    /* -----------------------------------
+       CARDS
+    ----------------------------------- */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      animation: fadeUp 0.4s ease both;
+    }
+    .card:nth-child(2) { animation-delay: 0.06s; }
+    .card:nth-child(3) { animation-delay: 0.12s; }
+    .card:nth-child(4) { animation-delay: 0.18s; }
+    .card-title {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      font-family: var(--mono);
+    }
+
+    /* -----------------------------------
+       STATUS BAR
+    ----------------------------------- */
+    .status-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 24px;
+    }
+    .status-indicator { display: flex; align-items: center; gap: 10px; }
+    .status-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 10px var(--green);
+      transition: var(--ease);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .status-dot.lleno { background: var(--red); box-shadow: 0 0 10px var(--red); animation: none; }
+    .status-text {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--green);
+      transition: var(--ease);
+    }
+    .status-text.lleno { color: var(--red); }
+    .capacity-display { display: flex; align-items: center; gap: 8px; }
+    .cap-fraction {
+      font-family: var(--mono);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .cap-fraction .current { color: var(--accent); transition: var(--ease); }
+    .cap-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      line-height: 1.3;
+    }
+
+    /* -----------------------------------
+       PROGRESS BAR
+    ----------------------------------- */
+    .progress-wrap { padding: 0 2px; }
+    .progress-bar-bg {
+      background: var(--border);
+      border-radius: 99px;
+      height: 6px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--accent), var(--green));
+      transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+      width: 0%;
+    }
+    .progress-bar-fill.lleno { background: linear-gradient(90deg, var(--red), #ff9a3c); }
+
+    /* -----------------------------------
+       FORM
+    ----------------------------------- */
+    .input-group { display: flex; gap: 10px; }
+    .input-field {
+      flex: 1;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: var(--body);
+      font-size: 0.95rem;
+      padding: 12px 16px;
+      outline: none;
+      transition: var(--ease);
+    }
+    .input-field::placeholder { color: var(--text-muted); }
+    .input-field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+    .btn {
+      border: none;
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-radius: var(--radius-sm);
+      padding: 12px 20px;
+      transition: var(--ease);
+      white-space: nowrap;
+    }
+    .btn-enter { background: var(--accent); color: var(--bg); }
+    .btn-enter:hover:not(:disabled) { background: #fff; box-shadow: 0 0 20px var(--accent); transform: translateY(-1px); }
+    .btn-enter:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* -----------------------------------
+       STUDENT LIST
+    ----------------------------------- */
+    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .list-count {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 2px 10px;
+    }
+    .student-list { list-style: none; display: flex; flex-direction: column; gap: 8px; min-height: 80px; }
+    .student-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: var(--ease);
+      animation: slideIn 0.25s ease both;
+    }
+    .student-item:hover { border-color: var(--accent); background: var(--accent-dim); }
+    .student-item.selected { border-color: var(--accent); background: var(--accent-dim); box-shadow: 0 0 0 1px #00e5ff44; }
+    .student-name { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-weight: 500; }
+    .student-avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 700;
+      color: var(--bg); flex-shrink: 0;
+      font-family: var(--mono);
+    }
+    .student-num { font-family: var(--mono); font-size: 0.65rem; color: var(--text-muted); }
+    .empty-state {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 32px; color: var(--text-muted);
+      gap: 8px; font-size: 0.85rem;
+    }
+    .empty-state span { font-size: 2rem; }
+
+    /* -----------------------------------
+       REMOVE BUTTON
+    ----------------------------------- */
+    .actions-row { margin-top: 14px; display: flex; justify-content: flex-end; }
+    .btn-remove { background: transparent; border: 1px solid var(--red); color: var(--red); }
+    .btn-remove:hover:not(:disabled) { background: var(--red-dim); box-shadow: 0 0 16px var(--red-dim); transform: translateY(-1px); }
+    .btn-remove:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* -----------------------------------
+       TOAST
+    ----------------------------------- */
+    .toast-container {
+      position: fixed; top: 20px; right: 20px;
+      z-index: 1000; display: flex;
+      flex-direction: column; gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 18px;
+      font-size: 0.88rem; color: var(--text);
+      min-width: 240px;
+      animation: toastIn 0.3s ease both;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 8px 32px #00000055;
+    }
+    .toast.success { border-left: 3px solid var(--green); }
+    .toast.error   { border-left: 3px solid var(--red); }
+    .toast.fadeout { animation: toastOut 0.3s ease forwards; }
+
+    /* -----------------------------------
+       FOOTER
+    ----------------------------------- */
+    .footer {
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      letter-spacing: 0.06em;
+      padding-top: 8px;
+    }
+
+    /* -----------------------------------
+       ANIMATIONS
+    ----------------------------------- */
+    @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(16px);  } to { opacity:1; transform:translateY(0); } }
+    @keyframes slideIn  { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:translateX(0); } }
+    @keyframes pulse    { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.6;transform:scale(.85);} }
+    @keyframes toastIn  { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } }
+    @keyframes toastOut { to { opacity:0; transform:translateX(30px); } }
+    @keyframes shake    { 0%,100%{transform:translateX(0);} 20%{transform:translateX(-6px);} 40%{transform:translateX(6px);} 60%{transform:translateX(-4px);} 80%{transform:translateX(4px);} }
+
+    @media (max-width: 480px) {
+      .status-card { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .input-group { flex-direction: column; }
+      .btn-enter { width: 100%; }
+    }
+  </style>
 </head>
 <body>
 
@@ -28,24 +336,22 @@
     <div class="capacity-display">
       <span class="cap-fraction">
         <span class="current" id="currentCount">0</span>
-        <span style="color:var(--text-muted); font-size:1rem"> / </span>
+        <span style="color:var(--text-muted);font-size:1rem"> / </span>
         <span id="maxCount">5</span>
       </span>
-      <div class="cap-label">
-        estudiantes<br>registrados
-      </div>
+      <div class="cap-label">estudiantes<br>registrados</div>
     </div>
   </div>
 
   <!-- PROGRESS -->
-  <div class="progress-wrap" style="padding: 0 2px;">
+  <div class="progress-wrap">
     <div class="progress-bar-bg">
       <div class="progress-bar-fill" id="progressBar"></div>
     </div>
   </div>
 
-  <!-- FORM INGRESAR -->
-  <div class="card" style="animation-delay:0.1s">
+  <!-- FORM -->
+  <div class="card">
     <div class="card-title">Registrar estudiante</div>
     <div class="input-group">
       <input
@@ -62,20 +368,18 @@
     </div>
   </div>
 
-  <!-- LISTA ESTUDIANTES -->
-  <div class="card" style="animation-delay:0.16s">
+  <!-- LISTA -->
+  <div class="card">
     <div class="list-header">
       <span class="card-title" style="margin:0">Estudiantes en el laboratorio</span>
       <span class="list-count" id="listCount">0 registrados</span>
     </div>
-
     <ul class="student-list" id="studentList">
       <div class="empty-state" id="emptyState">
         <span>🪑</span>
         El laboratorio está vacío
       </div>
     </ul>
-
     <div class="actions-row">
       <button class="btn btn-remove" id="btnSalir" onclick="salir()" disabled>
         ✕ &nbsp;Retirar estudiante
@@ -83,175 +387,127 @@
     </div>
   </div>
 
-  <!-- FOOTER -->
   <div class="footer">v1.0 · Capacidad máx. 5 estudiantes</div>
-
 </div>
 
 <script>
   // -----------------------------------
-  // ESTADO LOCAL
+  // ESTADO (reemplaza el backend Flask)
   // -----------------------------------
-  let estudianteSeleccionado = null;
+  const CAPACIDAD_MAXIMA = 5;
+  let estudiantes = [];
+  let seleccionado = null;
 
   // -----------------------------------
-  // INICIALIZAR
+  // INGRESAR
   // -----------------------------------
-  document.addEventListener('DOMContentLoaded', () => {
-    cargarEstado();
-    document.getElementById('inputNombre')
-      .addEventListener('keydown', e => { if (e.key === 'Enter') ingresar(); });
-  });
-
-  // -----------------------------------
-  // CARGAR ESTADO DESDE SERVIDOR
-  // -----------------------------------
-  async function cargarEstado() {
-    try {
-      const res  = await fetch('/api/estado');
-      const data = await res.json();
-      actualizarUI(data);
-    } catch {
-      showToast('No se pudo conectar al servidor.', 'error');
-    }
-  }
-
-  // -----------------------------------
-  // INGRESAR ESTUDIANTE
-  // -----------------------------------
-  async function ingresar() {
+  function ingresar() {
     const nombre = document.getElementById('inputNombre').value.trim();
+
     if (!nombre) {
       shakeInput();
       showToast('Escribe el nombre del estudiante.', 'error');
       return;
     }
 
-    try {
-      const res  = await fetch('/api/ingresar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre })
-      });
-      const data = await res.json();
-
-      if (data.exito) {
-        document.getElementById('inputNombre').value = '';
-        estudianteSeleccionado = null;
-        actualizarUI(data);
-        showToast(`✓ ${data.mensaje}`, 'success');
-      } else {
-        shakeInput();
-        showToast(data.mensaje, 'error');
-      }
-    } catch {
-      showToast('Error de conexión.', 'error');
+    if (estudiantes.length >= CAPACIDAD_MAXIMA) {
+      showToast('El laboratorio está lleno.', 'error');
+      return;
     }
+
+    if (estudiantes.includes(nombre)) {
+      shakeInput();
+      showToast(`"${nombre}" ya está registrado.`, 'error');
+      return;
+    }
+
+    estudiantes.push(nombre);
+    document.getElementById('inputNombre').value = '';
+    seleccionado = null;
+    actualizarUI();
+    showToast(`✓ ¡Bienvenido, ${nombre}!`, 'success');
   }
 
   // -----------------------------------
-  // SALIR ESTUDIANTE
+  // SALIR
   // -----------------------------------
-  async function salir() {
-    if (!estudianteSeleccionado) {
+  function salir() {
+    if (!seleccionado) {
       showToast('Selecciona un estudiante de la lista.', 'error');
       return;
     }
 
-    try {
-      const res  = await fetch('/api/salir', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre: estudianteSeleccionado })
-      });
-      const data = await res.json();
-
-      if (data.exito) {
-        estudianteSeleccionado = null;
-        actualizarUI(data);
-        showToast(`← ${data.mensaje}`, 'success');
-      } else {
-        showToast(data.mensaje, 'error');
-      }
-    } catch {
-      showToast('Error de conexión.', 'error');
-    }
+    const nombre = seleccionado;
+    estudiantes = estudiantes.filter(e => e !== nombre);
+    seleccionado = null;
+    actualizarUI();
+    showToast(`← ${nombre} salió del laboratorio.`, 'success');
   }
 
   // -----------------------------------
-  // SELECCIONAR ESTUDIANTE
+  // SELECCIONAR
   // -----------------------------------
   function seleccionarEstudiante(nombre, el) {
     document.querySelectorAll('.student-item').forEach(i => i.classList.remove('selected'));
 
-    if (estudianteSeleccionado === nombre) {
-      estudianteSeleccionado = null;
+    if (seleccionado === nombre) {
+      seleccionado = null;
       document.getElementById('btnSalir').disabled = true;
     } else {
-      estudianteSeleccionado = nombre;
+      seleccionado = nombre;
       el.classList.add('selected');
       document.getElementById('btnSalir').disabled = false;
     }
   }
 
   // -----------------------------------
-  // ACTUALIZAR INTERFAZ
+  // ACTUALIZAR UI
   // -----------------------------------
-  function actualizarUI(data) {
-    const { estudiantes, cantidad, capacidad_maxima, disponible } = data;
+  function actualizarUI() {
+    const cantidad   = estudiantes.length;
+    const disponible = cantidad < CAPACIDAD_MAXIMA;
 
-    // Contador
     document.getElementById('currentCount').textContent = cantidad;
-    document.getElementById('maxCount').textContent     = capacidad_maxima;
-    document.getElementById('listCount').textContent    = `${cantidad} registrado${cantidad !== 1 ? 's' : ''}`;
+    document.getElementById('listCount').textContent = `${cantidad} registrado${cantidad !== 1 ? 's' : ''}`;
 
     // Barra de progreso
-    const pct  = (cantidad / capacidad_maxima) * 100;
-    const bar  = document.getElementById('progressBar');
+    const pct = (cantidad / CAPACIDAD_MAXIMA) * 100;
+    const bar = document.getElementById('progressBar');
     bar.style.width = `${pct}%`;
     bar.classList.toggle('lleno', !disponible);
 
     // Estado
-    const dot  = document.getElementById('statusDot');
-    const txt  = document.getElementById('statusText');
-    const btn  = document.getElementById('btnIngresar');
+    const dot = document.getElementById('statusDot');
+    const txt = document.getElementById('statusText');
+    const btn = document.getElementById('btnIngresar');
 
-    if (!disponible) {
-      dot.classList.add('lleno');
-      txt.classList.add('lleno');
-      txt.textContent = 'LABORATORIO LLENO';
-      btn.disabled    = true;
-    } else {
-      dot.classList.remove('lleno');
-      txt.classList.remove('lleno');
-      txt.textContent = 'DISPONIBLE';
-      btn.disabled    = false;
-    }
+    dot.classList.toggle('lleno', !disponible);
+    txt.classList.toggle('lleno', !disponible);
+    txt.textContent = disponible ? 'DISPONIBLE' : 'LABORATORIO LLENO';
+    btn.disabled    = !disponible;
 
-    // Lista
-    renderLista(estudiantes);
+    renderLista();
   }
 
   // -----------------------------------
   // RENDERIZAR LISTA
   // -----------------------------------
-  function renderLista(estudiantes) {
+  function renderLista() {
     const lista = document.getElementById('studentList');
     const empty = document.getElementById('emptyState');
-
     lista.innerHTML = '';
 
     if (estudiantes.length === 0) {
       lista.appendChild(empty);
       document.getElementById('btnSalir').disabled = true;
-      estudianteSeleccionado = null;
+      seleccionado = null;
       return;
     }
 
     estudiantes.forEach((nombre, i) => {
-      const li   = document.createElement('li');
+      const li = document.createElement('li');
       li.className = 'student-item';
-      if (nombre === estudianteSeleccionado) li.classList.add('selected');
+      if (nombre === seleccionado) li.classList.add('selected');
 
       const iniciales = nombre.split(' ')
         .slice(0, 2).map(p => p[0]?.toUpperCase() || '').join('');
@@ -268,35 +524,35 @@
       lista.appendChild(li);
     });
 
-    if (estudianteSeleccionado && !estudiantes.includes(estudianteSeleccionado)) {
-      estudianteSeleccionado = null;
+    if (seleccionado && !estudiantes.includes(seleccionado)) {
+      seleccionado = null;
       document.getElementById('btnSalir').disabled = true;
     }
   }
 
   // -----------------------------------
-  // SHAKE INPUT (error)
+  // SHAKE INPUT
   // -----------------------------------
   function shakeInput() {
     const el = document.getElementById('inputNombre');
     el.style.animation = 'none';
     el.offsetHeight;
-    el.style.animation = 'shake 0.4s ease';
-    el.style.borderColor = 'var(--red)';
-    el.style.boxShadow  = '0 0 0 3px var(--red-dim)';
+    el.style.animation    = 'shake 0.4s ease';
+    el.style.borderColor  = 'var(--red)';
+    el.style.boxShadow    = '0 0 0 3px var(--red-dim)';
     setTimeout(() => {
       el.style.borderColor = '';
-      el.style.boxShadow  = '';
-      el.style.animation  = '';
+      el.style.boxShadow   = '';
+      el.style.animation   = '';
     }, 600);
   }
 
   // -----------------------------------
-  // TOAST NOTIFICATIONS
+  // TOAST
   // -----------------------------------
   function showToast(msg, type = 'success') {
     const container = document.getElementById('toastContainer');
-    const toast     = document.createElement('div');
+    const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.textContent = msg;
     container.appendChild(toast);
@@ -305,17 +561,15 @@
       setTimeout(() => toast.remove(), 320);
     }, 2800);
   }
-</script>
 
-<style>
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20%       { transform: translateX(-6px); }
-    40%       { transform: translateX(6px); }
-    60%       { transform: translateX(-4px); }
-    80%       { transform: translateX(4px); }
-  }
-</style>
+  // -----------------------------------
+  // ENTER KEY
+  // -----------------------------------
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('inputNombre')
+      .addEventListener('keydown', e => { if (e.key === 'Enter') ingresar(); });
+  });
+</script>
 
 </body>
 </html>
