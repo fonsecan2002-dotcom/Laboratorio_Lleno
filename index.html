@@ -410,22 +410,41 @@
       return;
     }
 
+    const partesNombre = nombre.split(/\s+/).filter(p => p.length > 0);
+    const regexNombre = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+
+    if (partesNombre.length < 2) {
+      shakeInput();
+      showToast('Por favor, ingresa el nombre completo (mínimo dos palabras).', 'error');
+      return;
+    }
+
+    if (!regexNombre.test(nombre)) {
+      shakeInput();
+      showToast('El nombre solo debe contener letras.', 'error');
+      return;
+    }
+
+    const nombreFormateado = partesNombre
+      .map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
+      .join(' ');
+
     if (estudiantes.length >= CAPACIDAD_MAXIMA) {
       showToast('El laboratorio está lleno.', 'error');
       return;
     }
 
-    if (estudiantes.includes(nombre)) {
+    if (estudiantes.includes(nombreFormateado)) {
       shakeInput();
-      showToast(`"${nombre}" ya está registrado.`, 'error');
+      showToast(`"${nombreFormateado}" ya está registrado.`, 'error');
       return;
     }
 
-    estudiantes.push(nombre);
+    estudiantes.push(nombreFormateado);
     document.getElementById('inputNombre').value = '';
     seleccionado = null;
     actualizarUI();
-    showToast(`✓ ¡Bienvenido, ${nombre}!`, 'success');
+    showToast(`✓ ¡Bienvenido, ${nombreFormateado}!`, 'success');
   }
 
   // -----------------------------------
