@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Control de Laboratorio</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <span class="icon">🔬</span>
+    <h1>Control de Laboratorio</h1>
+    <p>Sistema de Registro de Estudiantes</p>
+  </div>
+
+  <!-- STATUS -->
+  <div class="card status-card">
+    <div class="status-indicator">
+      <div class="status-dot" id="statusDot"></div>
+      <span class="status-text" id="statusText">DISPONIBLE</span>
+    </div>
+    <div class="capacity-display">
+      <span class="cap-fraction">
+        <span class="current" id="currentCount">0</span>
+        <span style="color:var(--text-muted); font-size:1rem"> / </span>
+        <span id="maxCount">5</span>
+      </span>
+      <div class="cap-label">
+        estudiantes<br>registrados
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap" style="padding: 0 2px;">
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+  </div>
+
+  <!-- FORM INGRESAR -->
+  <div class="card" style="animation-delay:0.1s">
+    <div class="card-title">Registrar estudiante</div>
+    <div class="input-group">
+      <input
+        type="text"
+        class="input-field"
+        id="inputNombre"
+        placeholder="Nombre completo..."
+        maxlength="60"
+        autocomplete="off"
+      />
+      <button class="btn btn-enter" id="btnIngresar" onclick="ingresar()">
+        Ingresar
+      </button>
+    </div>
+  </div>
+
+  <!-- LISTA ESTUDIANTES -->
+  <div class="card" style="animation-delay:0.16s">
+    <div class="list-header">
+      <span class="card-title" style="margin:0">Estudiantes en el laboratorio</span>
+      <span class="list-count" id="listCount">0 registrados</span>
+    </div>
+
+    <ul class="student-list" id="studentList">
+      <div class="empty-state" id="emptyState">
+        <span>🪑</span>
+        El laboratorio está vacío
+      </div>
+    </ul>
+
+    <div class="actions-row">
+      <button class="btn btn-remove" id="btnSalir" onclick="salir()" disabled>
+        ✕ &nbsp;Retirar estudiante
+      </button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">v1.0 · Capacidad máx. 5 estudiantes</div>
+
+</div>
+
+<script>
+  // -----------------------------------
+  // ESTADO LOCAL
+  // -----------------------------------
+  let estudianteSeleccionado = null;
+
+  // -----------------------------------
+  // INICIALIZAR
+  // -----------------------------------
+  document.addEventListener('DOMContentLoaded', () => {
+    cargarEstado();
+    document.getElementById('inputNombre')
+      .addEventListener('keydown', e => { if (e.key === 'Enter') ingresar(); });
+  });
+
+  // -----------------------------------
+  // CARGAR ESTADO DESDE SERVIDOR
+  // -----------------------------------
+  async function cargarEstado() {
+    try {
+      const res  = await fetch('/api/estado');
+      const data = await res.json();
+      actualizarUI(data);
+    } catch {
+      showToast('No se pudo conectar al servidor.', 'error');
+    }
+  }
+
+  // -----------------------------------
+  // INGRESAR ESTUDIANTE
+  // -----------------------------------
+  async function ingresar() {
+    const nombre = document.getElementById('inputNombre').value.trim();
+    if (!nombre) {
+      shakeInput();
+      showToast('Escribe el nombre del estudiante.', 'error');
+      return;
+    }
+
+    try {
+      const res  = await fetch('/api/ingresar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre })
+      });
+      const data = await res.json();
+
+      if (data.exito) {
+        document.getElementById('inputNombre').value = '';
+        estudianteSeleccionado = null;
+        actualizarUI(data);
+        showToast(`✓ ${data.mensaje}`, 'success');
+      } else {
+        shakeInput();
+        showToast(data.mensaje, 'error');
+      }
+    } catch {
+      showToast('Error de conexión.', 'error');
+    }
+  }
+
+  // -----------------------------------
+  // SALIR ESTUDIANTE
+  // -----------------------------------
+  async function salir() {
+    if (!estudianteSeleccionado) {
+      showToast('Selecciona un estudiante de la lista.', 'error');
+      return;
+    }
+
+    try {
+      const res  = await fetch('/api/salir', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: estudianteSeleccionado })
+      });
+      const data = await res.json();
+
+      if (data.exito) {
+        estudianteSeleccionado = null;
+        actualizarUI(data);
+        showToast(`← ${data.mensaje}`, 'success');
+      } else {
+        showToast(data.mensaje, 'error');
+      }
+    } catch {
+      showToast('Error de conexión.', 'error');
+    }
+  }
+
+  // -----------------------------------
+  // SELECCIONAR ESTUDIANTE
+  // -----------------------------------
+  function seleccionarEstudiante(nombre, el) {
+    document.querySelectorAll('.student-item').forEach(i => i.classList.remove('selected'));
+
+    if (estudianteSeleccionado === nombre) {
+      estudianteSeleccionado = null;
+      document.getElementById('btnSalir').disabled = true;
+    } else {
+      estudianteSeleccionado = nombre;
+      el.classList.add('selected');
+      document.getElementById('btnSalir').disabled = false;
+    }
+  }
+
+  // -----------------------------------
+  // ACTUALIZAR INTERFAZ
+  // -----------------------------------
+  function actualizarUI(data) {
+    const { estudiantes, cantidad, capacidad_maxima, disponible } = data;
+
+    // Contador
+    document.getElementById('currentCount').textContent = cantidad;
+    document.getElementById('maxCount').textContent     = capacidad_maxima;
+    document.getElementById('listCount').textContent    = `${cantidad} registrado${cantidad !== 1 ? 's' : ''}`;
+
+    // Barra de progreso
+    const pct  = (cantidad / capacidad_maxima) * 100;
+    const bar  = document.getElementById('progressBar');
+    bar.style.width = `${pct}%`;
+    bar.classList.toggle('lleno', !disponible);
+
+    // Estado
+    const dot  = document.getElementById('statusDot');
+    const txt  = document.getElementById('statusText');
+    const btn  = document.getElementById('btnIngresar');
+
+    if (!disponible) {
+      dot.classList.add('lleno');
+      txt.classList.add('lleno');
+      txt.textContent = 'LABORATORIO LLENO';
+      btn.disabled    = true;
+    } else {
+      dot.classList.remove('lleno');
+      txt.classList.remove('lleno');
+      txt.textContent = 'DISPONIBLE';
+      btn.disabled    = false;
+    }
+
+    // Lista
+    renderLista(estudiantes);
+  }
+
+  // -----------------------------------
+  // RENDERIZAR LISTA
+  // -----------------------------------
+  function renderLista(estudiantes) {
+    const lista = document.getElementById('studentList');
+    const empty = document.getElementById('emptyState');
+
+    lista.innerHTML = '';
+
+    if (estudiantes.length === 0) {
+      lista.appendChild(empty);
+      document.getElementById('btnSalir').disabled = true;
+      estudianteSeleccionado = null;
+      return;
+    }
+
+    estudiantes.forEach((nombre, i) => {
+      const li   = document.createElement('li');
+      li.className = 'student-item';
+      if (nombre === estudianteSeleccionado) li.classList.add('selected');
+
+      const iniciales = nombre.split(' ')
+        .slice(0, 2).map(p => p[0]?.toUpperCase() || '').join('');
+
+      li.innerHTML = `
+        <div class="student-name">
+          <div class="student-avatar">${iniciales || '?'}</div>
+          <span>${nombre}</span>
+        </div>
+        <span class="student-num">#${String(i + 1).padStart(2, '0')}</span>
+      `;
+
+      li.addEventListener('click', () => seleccionarEstudiante(nombre, li));
+      lista.appendChild(li);
+    });
+
+    if (estudianteSeleccionado && !estudiantes.includes(estudianteSeleccionado)) {
+      estudianteSeleccionado = null;
+      document.getElementById('btnSalir').disabled = true;
+    }
+  }
+
+  // -----------------------------------
+  // SHAKE INPUT (error)
+  // -----------------------------------
+  function shakeInput() {
+    const el = document.getElementById('inputNombre');
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = 'shake 0.4s ease';
+    el.style.borderColor = 'var(--red)';
+    el.style.boxShadow  = '0 0 0 3px var(--red-dim)';
+    setTimeout(() => {
+      el.style.borderColor = '';
+      el.style.boxShadow  = '';
+      el.style.animation  = '';
+    }, 600);
+  }
+
+  // -----------------------------------
+  // TOAST NOTIFICATIONS
+  // -----------------------------------
+  function showToast(msg, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast     = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.classList.add('fadeout');
+      setTimeout(() => toast.remove(), 320);
+    }, 2800);
+  }
+</script>
+
+<style>
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%       { transform: translateX(-6px); }
+    40%       { transform: translateX(6px); }
+    60%       { transform: translateX(-4px); }
+    80%       { transform: translateX(4px); }
+  }
+</style>
+
+</body>
+</html>
