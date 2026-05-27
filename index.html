@@ -453,16 +453,25 @@
       El laboratorio está vacío
     </div>
 
-    <div class="actions-row">
-      <button
-        class="btn btn-remove"
-        id="btnSalir"
-        onclick="salir()"
-        disabled
-      >
-        Retirar estudiante
-      </button>
-    </div>
+    <div class="actions-row" style="gap:10px;">
+
+  <button
+    class="btn btn-remove"
+    id="btnSalir"
+    onclick="salir()"
+    disabled
+  >
+    Retirar estudiante
+  </button>
+
+  <button
+    class="btn btn-remove"
+    onclick="vaciarLaboratorio()"
+  >
+    Vaciar laboratorio
+  </button>
+
+</div>
 
   </div>
 
@@ -827,6 +836,38 @@ function limpiarHistorial() {
   renderLog();
 
   showToast('Historial eliminado.', 'success');
+}
+
+function vaciarLaboratorio() {
+
+  if (estudiantes.length === 0) {
+
+    showToast(
+      'El laboratorio ya está vacío.',
+      'error'
+    );
+
+    return;
+  }
+
+  const confirmar = confirm(
+    '¿Seguro que deseas vaciar completamente el laboratorio?'
+  );
+
+  if (!confirmar) return;
+
+  estudiantes = [];
+
+  seleccionado = null;
+
+  actualizarUI();
+
+  document.getElementById('btnSalir').disabled = true;
+
+  showToast(
+    'Laboratorio liberado completamente.',
+    'success'
+  );
 }
 
 function showToast(msg, type='success') {
