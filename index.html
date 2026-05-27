@@ -4,590 +4,832 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Control de Laboratorio</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
   <style>
-    /* -----------------------------------
-       VARIABLES & RESET
-    ----------------------------------- */
     :root {
-      --bg:         #0b0f1a;
-      --surface:    #111827;
-      --surface-2:  #1a2235;
-      --border:     #1e2d45;
-      --accent:     #00e5ff;
+      --bg: #0b0f1a;
+      --surface: #111827;
+      --surface-2: #1a2235;
+      --border: #1e2d45;
+      --accent: #00e5ff;
       --accent-dim: #00e5ff22;
-      --green:      #00e676;
-      --green-dim:  #00e67622;
-      --red:        #ff4c6a;
-      --red-dim:    #ff4c6a22;
-      --text:       #e8edf5;
+      --green: #00e676;
+      --green-dim: #00e67622;
+      --red: #ff4c6a;
+      --red-dim: #ff4c6a22;
+      --yellow: #ffd740;
+      --yellow-dim: #ffd74022;
+      --text: #e8edf5;
       --text-muted: #5a6a85;
-      --mono:       'Space Mono', monospace;
-      --body:       'DM Sans', sans-serif;
-      --radius:     12px;
-      --radius-sm:  8px;
-      --ease:       0.22s cubic-bezier(0.4,0,0.2,1);
+      --mono: 'Space Mono', monospace;
+      --body: 'DM Sans', sans-serif;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --ease: 0.22s cubic-bezier(0.4,0,0.2,1);
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     body {
       background: var(--bg);
       color: var(--text);
       font-family: var(--body);
       min-height: 100vh;
+      padding: 30px 15px;
       display: flex;
-      align-items: flex-start;
       justify-content: center;
-      padding: 32px 16px 64px;
+
       background-image:
         radial-gradient(ellipse 80% 50% at 50% -10%, #00e5ff0d 0%, transparent 70%),
         repeating-linear-gradient(0deg, transparent, transparent 39px, #ffffff04 39px, #ffffff04 40px),
         repeating-linear-gradient(90deg, transparent, transparent 39px, #ffffff04 39px, #ffffff04 40px);
     }
 
-    /* -----------------------------------
-       LAYOUT
-    ----------------------------------- */
     .container {
       width: 100%;
-      max-width: 520px;
+      max-width: 600px;
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
 
-    /* -----------------------------------
-       HEADER
-    ----------------------------------- */
     .header {
       text-align: center;
-      padding: 24px 0 8px;
-      animation: fadeDown 0.5s ease both;
-    }
-    .header .icon { font-size: 2.4rem; margin-bottom: 10px; display: block; }
-    .header h1 {
-      font-family: var(--mono);
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--accent);
-      text-shadow: 0 0 24px var(--accent);
-    }
-    .header p {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      letter-spacing: 0.05em;
-      margin-top: 4px;
-      text-transform: uppercase;
+      padding: 20px 0;
     }
 
-    /* -----------------------------------
-       CARDS
-    ----------------------------------- */
+    .header h1 {
+      font-family: var(--mono);
+      color: var(--accent);
+      font-size: 1.6rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: .8rem;
+      margin-top: 5px;
+    }
+
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 24px;
-      animation: fadeUp 0.4s ease both;
+      padding: 22px;
     }
-    .card:nth-child(2) { animation-delay: 0.06s; }
-    .card:nth-child(3) { animation-delay: 0.12s; }
-    .card:nth-child(4) { animation-delay: 0.18s; }
+
     .card-title {
-      font-size: 0.72rem;
+      font-size: .75rem;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
+      letter-spacing: .12em;
       color: var(--text-muted);
-      margin-bottom: 14px;
+      margin-bottom: 15px;
       font-family: var(--mono);
     }
 
-    /* -----------------------------------
-       STATUS BAR
-    ----------------------------------- */
     .status-card {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      padding: 18px 24px;
+      align-items: center;
+      gap: 15px;
     }
-    .status-indicator { display: flex; align-items: center; gap: 10px; }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     .status-dot {
-      width: 10px; height: 10px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
       background: var(--green);
       box-shadow: 0 0 10px var(--green);
-      transition: var(--ease);
-      animation: pulse 2s ease-in-out infinite;
     }
-    .status-dot.lleno { background: var(--red); box-shadow: 0 0 10px var(--red); animation: none; }
+
+    .status-dot.casi {
+      background: var(--yellow);
+      box-shadow: 0 0 10px var(--yellow);
+    }
+
+    .status-dot.lleno {
+      background: var(--red);
+      box-shadow: 0 0 10px var(--red);
+    }
+
     .status-text {
       font-family: var(--mono);
-      font-size: 0.85rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
+      font-size: .85rem;
+      font-weight: bold;
       color: var(--green);
-      transition: var(--ease);
     }
-    .status-text.lleno { color: var(--red); }
-    .capacity-display { display: flex; align-items: center; gap: 8px; }
+
+    .status-text.casi {
+      color: var(--yellow);
+    }
+
+    .status-text.lleno {
+      color: var(--red);
+    }
+
     .cap-fraction {
       font-family: var(--mono);
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-    .cap-fraction .current { color: var(--accent); transition: var(--ease); }
-    .cap-label {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      line-height: 1.3;
+      font-size: 1.5rem;
     }
 
-    /* -----------------------------------
-       PROGRESS BAR
-    ----------------------------------- */
-    .progress-wrap { padding: 0 2px; }
+    .current {
+      color: var(--accent);
+    }
+
     .progress-bar-bg {
       background: var(--border);
-      border-radius: 99px;
-      height: 6px;
+      height: 8px;
+      border-radius: 999px;
       overflow: hidden;
     }
+
     .progress-bar-fill {
       height: 100%;
-      border-radius: 99px;
-      background: linear-gradient(90deg, var(--accent), var(--green));
-      transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
       width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--green));
+      transition: .4s;
     }
-    .progress-bar-fill.lleno { background: linear-gradient(90deg, var(--red), #ff9a3c); }
 
-    /* -----------------------------------
-       FORM
-    ----------------------------------- */
-    .input-group { display: flex; gap: 10px; }
+    .progress-bar-fill.casi {
+      background: linear-gradient(90deg, var(--yellow), orange);
+    }
+
+    .progress-bar-fill.lleno {
+      background: linear-gradient(90deg, var(--red), orange);
+    }
+
+    .input-group {
+      display: flex;
+      gap: 10px;
+    }
+
     .input-field {
       flex: 1;
       background: var(--surface-2);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      color: var(--text);
-      font-family: var(--body);
-      font-size: 0.95rem;
-      padding: 12px 16px;
+      padding: 12px 15px;
+      color: white;
       outline: none;
-      transition: var(--ease);
     }
-    .input-field::placeholder { color: var(--text-muted); }
-    .input-field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+
+    .input-field:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+
     .btn {
       border: none;
       cursor: pointer;
-      font-family: var(--mono);
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      padding: 12px 18px;
       border-radius: var(--radius-sm);
-      padding: 12px 20px;
-      transition: var(--ease);
-      white-space: nowrap;
-    }
-    .btn-enter { background: var(--accent); color: var(--bg); }
-    .btn-enter:hover:not(:disabled) { background: #fff; box-shadow: 0 0 20px var(--accent); transform: translateY(-1px); }
-    .btn-enter:disabled { opacity: 0.35; cursor: not-allowed; }
-
-    /* -----------------------------------
-       STUDENT LIST
-    ----------------------------------- */
-    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-    .list-count {
       font-family: var(--mono);
-      font-size: 0.72rem;
-      color: var(--text-muted);
+      font-weight: bold;
+      transition: .2s;
+    }
+
+    .btn-enter {
+      background: var(--accent);
+      color: black;
+    }
+
+    .btn-enter:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-enter:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
+    .student-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .student-item {
       background: var(--surface-2);
       border: 1px solid var(--border);
-      border-radius: 99px;
-      padding: 2px 10px;
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: .2s;
     }
-    .student-list { list-style: none; display: flex; flex-direction: column; gap: 8px; min-height: 80px; }
-    .student-item {
+
+    .student-item:hover {
+      border-color: var(--accent);
+    }
+
+    .student-item.selected {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .student-name {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 12px 14px;
-      cursor: pointer;
-      transition: var(--ease);
-      animation: slideIn 0.25s ease both;
+      gap: 10px;
     }
-    .student-item:hover { border-color: var(--accent); background: var(--accent-dim); }
-    .student-item.selected { border-color: var(--accent); background: var(--accent-dim); box-shadow: 0 0 0 1px #00e5ff44; }
-    .student-name { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-weight: 500; }
+
     .student-avatar {
-      width: 30px; height: 30px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--accent), var(--green));
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.7rem; font-weight: 700;
-      color: var(--bg); flex-shrink: 0;
+      color: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       font-family: var(--mono);
+      font-weight: bold;
     }
-    .student-num { font-family: var(--mono); font-size: 0.65rem; color: var(--text-muted); }
+
+    .student-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .student-time {
+      font-size: .7rem;
+      color: var(--accent);
+    }
+
+    .actions-row {
+      margin-top: 15px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-remove {
+      background: transparent;
+      border: 1px solid var(--red);
+      color: var(--red);
+    }
+
+    .btn-remove:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
     .empty-state {
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 32px; color: var(--text-muted);
-      gap: 8px; font-size: 0.85rem;
+      text-align: center;
+      padding: 30px;
+      color: var(--text-muted);
     }
-    .empty-state span { font-size: 2rem; }
 
-    /* -----------------------------------
-       REMOVE BUTTON
-    ----------------------------------- */
-    .actions-row { margin-top: 14px; display: flex; justify-content: flex-end; }
-    .btn-remove { background: transparent; border: 1px solid var(--red); color: var(--red); }
-    .btn-remove:hover:not(:disabled) { background: var(--red-dim); box-shadow: 0 0 16px var(--red-dim); transform: translateY(-1px); }
-    .btn-remove:disabled { opacity: 0.3; cursor: not-allowed; }
+    .log-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
 
-    /* -----------------------------------
-       TOAST
-    ----------------------------------- */
+    .log-table th,
+    .log-table td {
+      padding: 10px;
+      border-bottom: 1px solid #ffffff10;
+      text-align: left;
+      font-size: .82rem;
+    }
+
+    .badge {
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: .65rem;
+      font-family: var(--mono);
+      font-weight: bold;
+    }
+
+    .badge-in {
+      background: var(--green-dim);
+      color: var(--green);
+    }
+
+    .badge-out {
+      background: var(--red-dim);
+      color: var(--red);
+    }
+
     .toast-container {
-      position: fixed; top: 20px; right: 20px;
-      z-index: 1000; display: flex;
-      flex-direction: column; gap: 8px;
-      pointer-events: none;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 999;
     }
+
     .toast {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
       padding: 12px 18px;
-      font-size: 0.88rem; color: var(--text);
-      min-width: 240px;
-      animation: toastIn 0.3s ease both;
-      display: flex; align-items: center; gap: 10px;
-      box-shadow: 0 8px 32px #00000055;
-    }
-    .toast.success { border-left: 3px solid var(--green); }
-    .toast.error   { border-left: 3px solid var(--red); }
-    .toast.fadeout { animation: toastOut 0.3s ease forwards; }
-
-    /* -----------------------------------
-       FOOTER
-    ----------------------------------- */
-    .footer {
-      text-align: center;
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      font-family: var(--mono);
-      letter-spacing: 0.06em;
-      padding-top: 8px;
+      border-radius: var(--radius-sm);
+      min-width: 220px;
+      animation: aparecer .3s ease;
     }
 
-    /* -----------------------------------
-       ANIMATIONS
-    ----------------------------------- */
-    @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
-    @keyframes fadeUp   { from { opacity:0; transform:translateY(16px);  } to { opacity:1; transform:translateY(0); } }
-    @keyframes slideIn  { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:translateX(0); } }
-    @keyframes pulse    { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.6;transform:scale(.85);} }
-    @keyframes toastIn  { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } }
-    @keyframes toastOut { to { opacity:0; transform:translateX(30px); } }
-    @keyframes shake    { 0%,100%{transform:translateX(0);} 20%{transform:translateX(-6px);} 40%{transform:translateX(6px);} 60%{transform:translateX(-4px);} 80%{transform:translateX(4px);} }
+    .toast.success {
+      border-left: 4px solid var(--green);
+    }
+
+    .toast.error {
+      border-left: 4px solid var(--red);
+    }
+
+    @keyframes aparecer {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
 
     @media (max-width: 480px) {
-      .status-card { flex-direction: column; align-items: flex-start; gap: 12px; }
-      .input-group { flex-direction: column; }
-      .btn-enter { width: 100%; }
+      .input-group {
+        flex-direction: column;
+      }
+
+      .status-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
   </style>
 </head>
+
 <body>
 
 <div class="toast-container" id="toastContainer"></div>
 
 <div class="container">
 
-  <!-- HEADER -->
   <div class="header">
-    <span class="icon">🔬</span>
-    <h1>Control de Laboratorio</h1>
-    <p>Sistema de Registro de Estudiantes</p>
+    <h1>🔬 Control de Laboratorio</h1>
+    <p>Sistema de registro de estudiantes</p>
   </div>
 
-  <!-- STATUS -->
+  <!-- ESTADO -->
   <div class="card status-card">
+
     <div class="status-indicator">
       <div class="status-dot" id="statusDot"></div>
       <span class="status-text" id="statusText">DISPONIBLE</span>
     </div>
-    <div class="capacity-display">
-      <span class="cap-fraction">
-        <span class="current" id="currentCount">0</span>
-        <span style="color:var(--text-muted);font-size:1rem"> / </span>
-        <span id="maxCount">5</span>
-      </span>
-      <div class="cap-label">estudiantes<br>registrados</div>
+
+    <div class="cap-fraction">
+      <span class="current" id="currentCount">0</span>
+      /
+      <span>15</span>
     </div>
+
   </div>
 
-  <!-- PROGRESS -->
-  <div class="progress-wrap">
-    <div class="progress-bar-bg">
-      <div class="progress-bar-fill" id="progressBar"></div>
-    </div>
+  <!-- BARRA -->
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progressBar"></div>
   </div>
 
-  <!-- FORM -->
+  <!-- FORMULARIO -->
   <div class="card">
+
     <div class="card-title">Registrar estudiante</div>
+
     <div class="input-group">
+
       <input
         type="text"
-        class="input-field"
         id="inputNombre"
+        class="input-field"
         placeholder="Nombre completo..."
-        maxlength="60"
-        autocomplete="off"
-      />
-      <button class="btn btn-enter" id="btnIngresar" onclick="ingresar()">
+      >
+
+      <button
+        class="btn btn-enter"
+        id="btnIngresar"
+        onclick="ingresar()"
+      >
         Ingresar
       </button>
+
     </div>
+
   </div>
 
   <!-- LISTA -->
   <div class="card">
-    <div class="list-header">
-      <span class="card-title" style="margin:0">Estudiantes en el laboratorio</span>
-      <span class="list-count" id="listCount">0 registrados</span>
+
+    <div class="card-title">
+      Estudiantes en el laboratorio
     </div>
-    <ul class="student-list" id="studentList">
-      <div class="empty-state" id="emptyState">
-        <span>🪑</span>
-        El laboratorio está vacío
-      </div>
-    </ul>
+
+    <ul class="student-list" id="studentList"></ul>
+
+    <div class="empty-state" id="emptyState">
+      🪑<br><br>
+      El laboratorio está vacío
+    </div>
+
     <div class="actions-row">
-      <button class="btn btn-remove" id="btnSalir" onclick="salir()" disabled>
-        ✕ &nbsp;Retirar estudiante
+      <button
+        class="btn btn-remove"
+        id="btnSalir"
+        onclick="salir()"
+        disabled
+      >
+        Retirar estudiante
       </button>
     </div>
+
   </div>
 
-  <div class="footer">v1.0 · Capacidad máx. 5 estudiantes</div>
+  <!-- REGISTRO -->
+  <div class="card">
+
+    <div class="card-title">
+      Registro de entradas y salidas
+    </div>
+
+    <table class="log-table">
+
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Estudiante</th>
+          <th>Evento</th>
+          <th>Hora</th>
+        </tr>
+      </thead>
+
+      <tbody id="logBody">
+        <tr>
+          <td colspan="4">
+            Sin eventos registrados
+          </td>
+        </tr>
+      </tbody>
+
+    </table>
+
+  </div>
+
 </div>
 
 <script>
-  // -----------------------------------
-  // ESTADO (reemplaza el backend Flask)
-  // -----------------------------------
-  const CAPACIDAD_MAXIMA = 5;
-  let estudiantes = [];
-  let seleccionado = null;
 
-  // -----------------------------------
-  // INGRESAR
-  // -----------------------------------
-  function ingresar() {
-    const nombre = document.getElementById('inputNombre').value.trim();
+const CAPACIDAD_MAXIMA = 15;
+const UMBRAL_CASI_LLENO = 12;
 
-    if (!nombre) {
-      shakeInput();
-      showToast('Escribe el nombre del estudiante.', 'error');
-      return;
-    }
+let estudiantes = [];
+let logRegistro = [];
+let seleccionado = null;
+let secuencia = 0;
 
-    const partesNombre = nombre.split(/\s+/).filter(p => p.length > 0);
-    const regexNombre = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+function ahora() {
 
-    if (partesNombre.length < 2) {
-      shakeInput();
-      showToast('Por favor, ingresa el nombre completo (mínimo dos palabras).', 'error');
-      return;
-    }
+  const d = new Date();
 
-    if (!regexNombre.test(nombre)) {
-      shakeInput();
-      showToast('El nombre solo debe contener letras.', 'error');
-      return;
-    }
+  return {
+    hora: d.toLocaleTimeString('es-CO')
+  };
+}
 
-    const nombreFormateado = partesNombre
-      .map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
-      .join(' ');
+function ingresar() {
 
-    if (estudiantes.length >= CAPACIDAD_MAXIMA) {
-      showToast('El laboratorio está lleno.', 'error');
-      return;
-    }
+  const input = document.getElementById('inputNombre');
 
-    if (estudiantes.includes(nombreFormateado)) {
-      shakeInput();
-      showToast(`"${nombreFormateado}" ya está registrado.`, 'error');
-      return;
-    }
+  const nombre = input.value.trim();
 
-    estudiantes.push(nombreFormateado);
-    document.getElementById('inputNombre').value = '';
-    seleccionado = null;
-    actualizarUI();
-    showToast(`✓ ¡Bienvenido, ${nombreFormateado}!`, 'success');
+  // VALIDAR VACÍO
+  if (nombre === '') {
+    showToast('Escribe un nombre.', 'error');
+    return;
   }
 
-  // -----------------------------------
-  // SALIR
-  // -----------------------------------
-  function salir() {
-    if (!seleccionado) {
-      showToast('Selecciona un estudiante de la lista.', 'error');
-      return;
-    }
+  // VALIDAR NOMBRE Y APELLIDO
+  const partes = nombre.split(/\s+/);
 
-    const nombre = seleccionado;
-    estudiantes = estudiantes.filter(e => e !== nombre);
-    seleccionado = null;
-    actualizarUI();
-    showToast(`← ${nombre} salió del laboratorio.`, 'success');
+  if (partes.length < 2) {
+    showToast('Ingresa nombre y apellido.', 'error');
+    return;
   }
 
-  // -----------------------------------
-  // SELECCIONAR
-  // -----------------------------------
-  function seleccionarEstudiante(nombre, el) {
-    document.querySelectorAll('.student-item').forEach(i => i.classList.remove('selected'));
+  // VALIDAR LETRAS
+  const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
 
-    if (seleccionado === nombre) {
-      seleccionado = null;
-      document.getElementById('btnSalir').disabled = true;
-    } else {
-      seleccionado = nombre;
-      el.classList.add('selected');
-      document.getElementById('btnSalir').disabled = false;
-    }
+  if (!regex.test(nombre)) {
+    showToast('Solo letras y espacios.', 'error');
+    return;
   }
 
-  // -----------------------------------
-  // ACTUALIZAR UI
-  // -----------------------------------
-  function actualizarUI() {
-    const cantidad   = estudiantes.length;
-    const disponible = cantidad < CAPACIDAD_MAXIMA;
+  // FORMATEAR
+  const nombreFinal = partes
+    .map(p =>
+      p.charAt(0).toUpperCase() +
+      p.slice(1).toLowerCase()
+    )
+    .join(' ');
 
-    document.getElementById('currentCount').textContent = cantidad;
-    document.getElementById('listCount').textContent = `${cantidad} registrado${cantidad !== 1 ? 's' : ''}`;
-
-    // Barra de progreso
-    const pct = (cantidad / CAPACIDAD_MAXIMA) * 100;
-    const bar = document.getElementById('progressBar');
-    bar.style.width = `${pct}%`;
-    bar.classList.toggle('lleno', !disponible);
-
-    // Estado
-    const dot = document.getElementById('statusDot');
-    const txt = document.getElementById('statusText');
-    const btn = document.getElementById('btnIngresar');
-
-    dot.classList.toggle('lleno', !disponible);
-    txt.classList.toggle('lleno', !disponible);
-    txt.textContent = disponible ? 'DISPONIBLE' : 'LABORATORIO LLENO';
-    btn.disabled    = !disponible;
-
-    renderLista();
+  // LABORATORIO LLENO
+  if (estudiantes.length >= CAPACIDAD_MAXIMA) {
+    showToast('Laboratorio lleno.', 'error');
+    return;
   }
 
-  // -----------------------------------
-  // RENDERIZAR LISTA
-  // -----------------------------------
-  function renderLista() {
-    const lista = document.getElementById('studentList');
-    const empty = document.getElementById('emptyState');
-    lista.innerHTML = '';
+  // DUPLICADO
+  if (estudiantes.some(e => e.nombre === nombreFinal)) {
+    showToast('Ese estudiante ya está registrado.', 'error');
+    return;
+  }
 
-    if (estudiantes.length === 0) {
-      lista.appendChild(empty);
-      document.getElementById('btnSalir').disabled = true;
-      seleccionado = null;
-      return;
+  // AGREGAR
+  const t = ahora();
+
+  estudiantes.push({
+    nombre: nombreFinal,
+    horaIngreso: t.hora
+  });
+
+  agregarLog(nombreFinal, 'ENTRADA', t.hora);
+
+  input.value = '';
+
+  actualizarUI();
+
+  showToast(`${nombreFinal} ingresó correctamente.`, 'success');
+}
+
+function salir() {
+
+  if (!seleccionado) {
+    showToast('Selecciona un estudiante.', 'error');
+    return;
+  }
+
+  estudiantes = estudiantes.filter(
+    e => e.nombre !== seleccionado
+  );
+
+  agregarLog(seleccionado, 'SALIDA', ahora().hora);
+
+  seleccionado = null;
+
+  actualizarUI();
+
+  showToast('Estudiante retirado.', 'success');
+}
+
+function actualizarUI() {
+
+  const cantidad = estudiantes.length;
+
+  document.getElementById('currentCount').textContent = cantidad;
+
+  // ESTADO
+  const statusText = document.getElementById('statusText');
+  const statusDot = document.getElementById('statusDot');
+
+  statusText.className = 'status-text';
+  statusDot.className = 'status-dot';
+
+  if (cantidad >= CAPACIDAD_MAXIMA) {
+
+    statusText.textContent = 'LABORATORIO LLENO';
+
+    statusText.classList.add('lleno');
+    statusDot.classList.add('lleno');
+
+  } else if (cantidad >= UMBRAL_CASI_LLENO) {
+
+    statusText.textContent = 'CASI LLENO';
+
+    statusText.classList.add('casi');
+    statusDot.classList.add('casi');
+
+  } else {
+
+    statusText.textContent = 'DISPONIBLE';
+  }
+
+  // BARRA
+  const porcentaje = (cantidad / CAPACIDAD_MAXIMA) * 100;
+
+  const bar = document.getElementById('progressBar');
+
+  bar.style.width = porcentaje + '%';
+
+  bar.className = 'progress-bar-fill';
+
+  if (cantidad >= CAPACIDAD_MAXIMA) {
+    bar.classList.add('lleno');
+  } else if (cantidad >= UMBRAL_CASI_LLENO) {
+    bar.classList.add('casi');
+  }
+
+  // BLOQUEAR BOTÓN
+  document.getElementById('btnIngresar').disabled =
+    cantidad >= CAPACIDAD_MAXIMA;
+
+  renderLista();
+}
+
+function renderLista() {
+
+  const lista = document.getElementById('studentList');
+
+  const empty = document.getElementById('emptyState');
+
+  lista.innerHTML = '';
+
+  if (estudiantes.length === 0) {
+
+    empty.style.display = 'block';
+
+    document.getElementById('btnSalir').disabled = true;
+
+    return;
+  }
+
+  empty.style.display = 'none';
+
+  estudiantes.forEach((est, i) => {
+
+    const li = document.createElement('li');
+
+    li.className = 'student-item';
+
+    if (seleccionado === est.nombre) {
+      li.classList.add('selected');
     }
 
-    estudiantes.forEach((nombre, i) => {
-      const li = document.createElement('li');
-      li.className = 'student-item';
-      if (nombre === seleccionado) li.classList.add('selected');
+    const iniciales = est.nombre
+      .split(' ')
+      .map(p => p[0])
+      .slice(0,2)
+      .join('');
 
-      const iniciales = nombre.split(' ')
-        .slice(0, 2).map(p => p[0]?.toUpperCase() || '').join('');
+    li.innerHTML = `
+      <div class="student-name">
 
-      li.innerHTML = `
-        <div class="student-name">
-          <div class="student-avatar">${iniciales || '?'}</div>
-          <span>${nombre}</span>
+        <div class="student-avatar">
+          ${iniciales}
         </div>
-        <span class="student-num">#${String(i + 1).padStart(2, '0')}</span>
-      `;
 
-      li.addEventListener('click', () => seleccionarEstudiante(nombre, li));
-      lista.appendChild(li);
+        <div class="student-info">
+          <span>${est.nombre}</span>
+          <span class="student-time">
+            ⏱ ${est.horaIngreso}
+          </span>
+        </div>
+
+      </div>
+
+      <span>#${String(i + 1).padStart(2,'0')}</span>
+    `;
+
+    li.onclick = () => seleccionar(est.nombre);
+
+    lista.appendChild(li);
+
+  });
+}
+
+function seleccionar(nombre) {
+
+  if (seleccionado === nombre) {
+
+    seleccionado = null;
+
+    document.getElementById('btnSalir').disabled = true;
+
+  } else {
+
+    seleccionado = nombre;
+
+    document.getElementById('btnSalir').disabled = false;
+  }
+
+  renderLista();
+}
+
+function agregarLog(nombre, tipo, hora) {
+
+  secuencia++;
+
+  logRegistro.unshift({
+    id: secuencia,
+    nombre,
+    tipo,
+    hora
+  });
+
+  renderLog();
+}
+
+function renderLog() {
+
+  const body = document.getElementById('logBody');
+
+  if (logRegistro.length === 0) {
+
+    body.innerHTML = `
+      <tr>
+        <td colspan="4">
+          Sin eventos registrados
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  body.innerHTML = '';
+
+  logRegistro.forEach(log => {
+
+    const tr = document.createElement('tr');
+
+    tr.innerHTML = `
+      <td>${String(log.id).padStart(3,'0')}</td>
+
+      <td>${log.nombre}</td>
+
+      <td>
+        <span class="badge ${
+          log.tipo === 'ENTRADA'
+            ? 'badge-in'
+            : 'badge-out'
+        }">
+          ${log.tipo}
+        </span>
+      </td>
+
+      <td>${log.hora}</td>
+    `;
+
+    body.appendChild(tr);
+
+  });
+}
+
+function showToast(msg, type='success') {
+
+  const container =
+    document.getElementById('toastContainer');
+
+  const toast = document.createElement('div');
+
+  toast.className = `toast ${type}`;
+
+  toast.textContent = msg;
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+// ENTER
+document.addEventListener('DOMContentLoaded', () => {
+
+  document
+    .getElementById('inputNombre')
+    .addEventListener('keydown', e => {
+
+      if (e.key === 'Enter') {
+        ingresar();
+      }
+
     });
 
-    if (seleccionado && !estudiantes.includes(seleccionado)) {
-      seleccionado = null;
-      document.getElementById('btnSalir').disabled = true;
-    }
-  }
+});
 
-  // -----------------------------------
-  // SHAKE INPUT
-  // -----------------------------------
-  function shakeInput() {
-    const el = document.getElementById('inputNombre');
-    el.style.animation = 'none';
-    el.offsetHeight;
-    el.style.animation    = 'shake 0.4s ease';
-    el.style.borderColor  = 'var(--red)';
-    el.style.boxShadow    = '0 0 0 3px var(--red-dim)';
-    setTimeout(() => {
-      el.style.borderColor = '';
-      el.style.boxShadow   = '';
-      el.style.animation   = '';
-    }, 600);
-  }
+actualizarUI();
 
-  // -----------------------------------
-  // TOAST
-  // -----------------------------------
-  function showToast(msg, type = 'success') {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = msg;
-    container.appendChild(toast);
-    setTimeout(() => {
-      toast.classList.add('fadeout');
-      setTimeout(() => toast.remove(), 320);
-    }, 2800);
-  }
-
-  // -----------------------------------
-  // ENTER KEY
-  // -----------------------------------
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('inputNombre')
-      .addEventListener('keydown', e => { if (e.key === 'Enter') ingresar(); });
-  });
 </script>
 
 </body>
