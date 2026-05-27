@@ -823,12 +823,6 @@ function limpiarHistorial() {
     return;
   }
 
-  const confirmar = confirm(
-    '¿Seguro que deseas borrar todo el historial?'
-  );
-
-  if (!confirmar) return;
-
   logRegistro = [];
 
   secuencia = 0;
@@ -849,12 +843,6 @@ function vaciarLaboratorio() {
 
     return;
   }
-
-  const confirmar = confirm(
-    '¿Seguro que deseas vaciar completamente el laboratorio?'
-  );
-
-  if (!confirmar) return;
 
   estudiantes = [];
 
