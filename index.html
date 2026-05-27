@@ -470,10 +470,21 @@
   <div class="card">
 
     <div class="card-title">
-      Registro de entradas y salidas
-    </div>
+  Registro de entradas y salidas
+</div>
 
-    <table class="log-table">
+<div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+  
+  <button
+    class="btn btn-remove"
+    onclick="limpiarHistorial()"
+  >
+    Limpiar historial
+  </button>
+
+</div>
+
+<table class="log-table">
 
       <thead>
         <tr>
@@ -793,6 +804,29 @@ function renderLog() {
     body.appendChild(tr);
 
   });
+}
+
+function limpiarHistorial() {
+
+  if (logRegistro.length === 0) {
+
+    showToast('No hay historial para borrar.', 'error');
+    return;
+  }
+
+  const confirmar = confirm(
+    '¿Seguro que deseas borrar todo el historial?'
+  );
+
+  if (!confirmar) return;
+
+  logRegistro = [];
+
+  secuencia = 0;
+
+  renderLog();
+
+  showToast('Historial eliminado.', 'success');
 }
 
 function showToast(msg, type='success') {
